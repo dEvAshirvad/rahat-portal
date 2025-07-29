@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { User, Lock, Eye, EyeOff } from "lucide-react";
 import ForgotPasswordModal from "@/components/ForgotPasswordModal";
-import { useLogin, useCurrentUser } from "@/queries";
+import { useLogin } from "@/queries";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import Footer from "@/components/layout/Footer";

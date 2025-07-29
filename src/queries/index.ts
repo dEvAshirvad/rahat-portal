@@ -1,12 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { authService, casesApi, analyticsApi, fileService } from "@/lib/api";
-import type {
-	LoginRequest,
-	CaseCreateRequest,
-	CaseUpdateRequest,
-	DocumentUploadRequest,
-	Member,
-} from "@/types";
+import type { CaseUpdateRequest, DocumentUploadRequest } from "@/types";
 
 // Auth Queries
 export const useLogin = () => {

@@ -1,15 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
-	useMyPendingCases,
 	useUpdateCase,
 	useDashboardAnalytics,
 	useCurrentUser,
 	useLogout,
+	useCases,
 } from "@/queries";
 import CaseTable from "@/components/CaseTable";
 import AnalyticsChart from "@/components/AnalyticsChart";
@@ -26,10 +25,9 @@ import {
 
 export default function CollectorDashboard() {
 	const router = useRouter();
-	const [selectedStage, setSelectedStage] = useState<number | undefined>();
 
 	const { data: user } = useCurrentUser();
-	const { data: pendingCasesData } = useMyPendingCases({
+	const { data: cases } = useCases({
 		page: 1,
 		limit: 100,
 	});
@@ -110,26 +108,26 @@ export default function CollectorDashboard() {
 		return <div>Loading...</div>;
 	}
 
-	const cases = pendingCasesData?.docs || [];
+	const casesDocs = cases?.docs || [];
 
 	// Transform analytics data for charts
 	const statusChartData =
 		analytics?.statusOverview?.map((item) => ({
 			name: item.status.charAt(0).toUpperCase() + item.status.slice(1),
-			count: item.count,
+			value: item.count,
 			percentage: item.percentage,
 		})) || [];
 
 	const delayChartData =
 		analytics?.delayAnalysis?.stageDelays?.map((item) => ({
 			name: `Stage ${item.stage}`,
-			count: item.count,
+			value: item.count,
 		})) || [];
 
 	const rejectionChartData =
 		analytics?.rejectionAnalysis?.rejectionsByStage?.map((item) => ({
 			name: `Stage ${item.stage}`,
-			rate: item.rate,
+			value: item.rate,
 		})) || [];
 
 	return (
@@ -157,9 +155,7 @@ export default function CollectorDashboard() {
 								</div>
 								<Button
 									onClick={handleLogout}
-									disabled={logoutMutation.isPending}
-									variant="outline"
-									className="text-white border-white hover:bg-white hover:text-slate-800">
+									disabled={logoutMutation.isPending}>
 									<LogOut className="h-4 w-4 mr-2" />
 									{logoutMutation.isPending ? "Logging out..." : "Logout"}
 								</Button>
@@ -302,7 +298,7 @@ export default function CollectorDashboard() {
 
 						{/* Cases Table */}
 						<CaseTable
-							cases={cases}
+							cases={casesDocs}
 							userRole="collector"
 							onViewCase={handleViewCase}
 							onApproveCase={handleApproveCase}

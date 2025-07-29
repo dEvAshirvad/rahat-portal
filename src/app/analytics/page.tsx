@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,13 +19,10 @@ import {
 	YAxis,
 	CartesianGrid,
 	Tooltip,
-	Legend,
 	ResponsiveContainer,
 	PieChart,
 	Pie,
 	Cell,
-	LineChart,
-	Line,
 	AreaChart,
 	Area,
 } from "recharts";
@@ -39,20 +36,8 @@ import {
 	AlertCircle,
 	Download,
 	Filter,
-	Calendar,
-	MapPin,
-	Phone,
 	LogOut,
 } from "lucide-react";
-
-const COLORS = [
-	"#0088FE",
-	"#00C49F",
-	"#FFBB28",
-	"#FF8042",
-	"#8884D8",
-	"#82CA9D",
-];
 
 export default function AnalyticsDashboard() {
 	const [dateRange, setDateRange] = useState("30");
@@ -61,11 +46,11 @@ export default function AnalyticsDashboard() {
 	const [showFilters, setShowFilters] = useState(false);
 
 	const { data: analytics } = useDashboardAnalytics();
-	const { data: casesData } = useCases({ limit: 1000 });
+	const { data: casesData } = useCases({ limit: 99 });
 	const { data: user } = useCurrentUser();
 	const logoutMutation = useLogout();
 
-	const cases = casesData?.cases || [];
+	const cases = casesData?.docs || [];
 
 	// Filter cases based on selected criteria
 	const filteredCases = cases.filter((caseItem) => {
@@ -92,9 +77,46 @@ export default function AnalyticsDashboard() {
 			color: "#0088FE",
 		},
 		{
-			name: "Pending",
-			value: filteredCases.filter((c) => c.status === "pending").length,
+			name: "Pending SDM",
+			value: filteredCases.filter((c) => c.status === "pendingSDM").length,
 			color: "#FFBB28",
+		},
+		{
+			name: "Pending Rahat Shakha",
+			value: filteredCases.filter((c) => c.status === "pendingRahatShakha")
+				.length,
+			color: "#FFA500",
+		},
+		{
+			name: "Pending OIC",
+			value: filteredCases.filter((c) => c.status === "pendingOIC").length,
+			color: "#800080",
+		},
+		{
+			name: "Pending Additional Collector",
+			value: filteredCases.filter(
+				(c) => c.status === "pendingAdditionalCollector"
+			).length,
+			color: "#4B0082",
+		},
+		{
+			name: "Pending Collector",
+			value: filteredCases.filter((c) => c.status === "pendingCollector")
+				.length,
+			color: "#FFC0CB",
+		},
+		{
+			name: "Pending Additional Collector 2",
+			value: filteredCases.filter(
+				(c) => c.status === "pendingAdditionalCollector2"
+			).length,
+			color: "#008080",
+		},
+		{
+			name: "Pending Tehsildar",
+			value: filteredCases.filter((c) => c.status === "pendingTehsildar")
+				.length,
+			color: "#50C878",
 		},
 		{
 			name: "Approved",
@@ -272,25 +294,17 @@ export default function AnalyticsDashboard() {
 									</p>
 								</div>
 								<div className="flex space-x-2">
-									<Button
-										onClick={exportData}
-										variant="outline"
-										className="text-white border-white hover:bg-white hover:text-slate-800">
+									<Button onClick={exportData}>
 										<Download className="h-4 w-4 mr-2" />
 										Export Data
 									</Button>
-									<Button
-										onClick={() => setShowFilters(!showFilters)}
-										variant="outline"
-										className="text-white border-white hover:bg-white hover:text-slate-800">
+									<Button onClick={() => setShowFilters(!showFilters)}>
 										<Filter className="h-4 w-4 mr-2" />
 										Filters
 									</Button>
 									<Button
 										onClick={handleLogout}
-										disabled={logoutMutation.isPending}
-										variant="outline"
-										className="text-white border-white hover:bg-white hover:text-slate-800">
+										disabled={logoutMutation.isPending}>
 										<LogOut className="h-4 w-4 mr-2" />
 										{logoutMutation.isPending ? "Logging out..." : "Logout"}
 									</Button>
@@ -330,7 +344,23 @@ export default function AnalyticsDashboard() {
 												onChange={(e) => setSelectedStatus(e.target.value)}>
 												<option value="all">All Status</option>
 												<option value="created">Created</option>
-												<option value="pending">Pending</option>
+												<option value="pendingSDM">Pending SDM</option>
+												<option value="pendingRahatShakha">
+													Pending Rahat Shakha
+												</option>
+												<option value="pendingOIC">Pending OIC</option>
+												<option value="pendingAdditionalCollector">
+													Pending Additional Collector
+												</option>
+												<option value="pendingCollector">
+													Pending Collector
+												</option>
+												<option value="pendingAdditionalCollector2">
+													Pending Additional Collector 2
+												</option>
+												<option value="pendingTehsildar">
+													Pending Tehsildar
+												</option>
 												<option value="approved">Approved</option>
 												<option value="rejected">Rejected</option>
 												<option value="closed">Closed</option>
@@ -351,7 +381,6 @@ export default function AnalyticsDashboard() {
 												<option value="6">Stage 6</option>
 												<option value="7">Stage 7</option>
 												<option value="8">Stage 8</option>
-												<option value="9">Stage 9</option>
 											</select>
 										</div>
 									</div>
@@ -383,8 +412,11 @@ export default function AnalyticsDashboard() {
 											<p className="text-sm text-yellow-600">Pending Cases</p>
 											<p className="text-2xl font-bold text-yellow-800">
 												{
-													filteredCases.filter((c) => c.status === "pending")
-														.length
+													filteredCases.filter(
+														(c) =>
+															c.status.startsWith("pending") &&
+															c.status !== "pendingTehsildar"
+													).length
 												}
 											</p>
 										</div>

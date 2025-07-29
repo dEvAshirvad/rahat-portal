@@ -8,6 +8,7 @@ import type {
 	AuthResponse,
 	LoginRequest,
 	User,
+	Member,
 	ApiResponse,
 } from "@/types";
 
@@ -64,9 +65,11 @@ export const authService = {
 		return response.data.user!;
 	},
 
-	getMemberInfo: async (): Promise<any> => {
-		const response = await authApi.get<ApiResponse<any>>("/api/v1/members/me");
-		return response.data.member;
+	getMemberInfo: async (): Promise<Member> => {
+		const response = await authApi.get<ApiResponse<{ member: Member }>>(
+			"/api/v1/members/me"
+		);
+		return response.data.member!;
 	},
 
 	getMembersByRole: async (
@@ -189,23 +192,16 @@ export const casesApi = {
 		limit?: number;
 		search?: string;
 	}): Promise<{
-		cases: Case[];
+		docs: Case[];
 		total: number;
 		page: number;
 		totalPages: number;
 		message: string;
 	}> => {
-		const response = await caseApi.get<
-			ApiResponse<{
-				cases: Case[];
-				total: number;
-				page: number;
-				totalPages: number;
-				message: string;
-			}>
-		>("/api/v1/cases", { params });
+		const response = await caseApi.get("/api/v1/cases", { params });
+		// The API returns the case data directly, not wrapped in a data property
 		return response.data as {
-			cases: Case[];
+			docs: Case[];
 			total: number;
 			page: number;
 			totalPages: number;
@@ -233,24 +229,8 @@ export const casesApi = {
 		timestamp: string;
 		cache: boolean;
 	}> => {
-		const response = await caseApi.get<
-			ApiResponse<{
-				docs: Case[];
-				limit: number;
-				totalDocs: number;
-				totalPages: number;
-				page: number;
-				nextPage: boolean;
-				prevPage: boolean;
-				userRole: string;
-				stageFilter: number | null;
-				message: string;
-				success: boolean;
-				status: number;
-				timestamp: string;
-				cache: boolean;
-			}>
-		>("/api/v1/cases/my-pending", { params });
+		const response = await caseApi.get("/api/v1/cases/my-pending", { params });
+		// The API returns the case data directly, not wrapped in a data property
 		return response.data as {
 			docs: Case[];
 			limit: number;
@@ -273,31 +253,60 @@ export const casesApi = {
 		id: string
 	): Promise<{
 		caseId: string;
-		victim: any;
+		victim: {
+			name: string;
+			dob: string;
+			dod: string;
+			address: string;
+			contact: string;
+			description: string;
+			_id: string;
+		};
 		status: string;
 		stage: number;
-		documents: any[];
-		remarks: any[];
+		documents: Array<{
+			url: string;
+			type: string;
+			uploadedAt: string;
+			_id: string;
+		}>;
+		remarks: Array<{
+			stage: number;
+			remark: string;
+			userId: string;
+			date: string;
+			_id: string;
+		}>;
 		message: string;
 	}> => {
-		const response = await caseApi.get<
-			ApiResponse<{
-				caseId: string;
-				victim: any;
-				status: string;
-				stage: number;
-				documents: any[];
-				remarks: any[];
-				message: string;
-			}>
-		>(`/api/v1/cases/${id}`);
-		return response.data as unknown as {
+		const response = await caseApi.get(`/api/v1/cases/${id}`);
+		// The API returns the case data directly, not wrapped in a data property
+		return response.data as {
 			caseId: string;
-			victim: any;
+			victim: {
+				name: string;
+				dob: string;
+				dod: string;
+				address: string;
+				contact: string;
+				description: string;
+				_id: string;
+			};
 			status: string;
 			stage: number;
-			documents: any[];
-			remarks: any[];
+			documents: Array<{
+				url: string;
+				type: string;
+				uploadedAt: string;
+				_id: string;
+			}>;
+			remarks: Array<{
+				stage: number;
+				remark: string;
+				userId: string;
+				date: string;
+				_id: string;
+			}>;
 			message: string;
 		};
 	},

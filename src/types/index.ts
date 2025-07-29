@@ -25,7 +25,11 @@ export interface Member {
 	departmentSlug: string;
 	role: string;
 	metadata: {
-		kpirefs: any[];
+		kpirefs: Array<{
+			id: string;
+			name: string;
+			description?: string;
+		}>;
 		isMultipleKPIRef: boolean;
 	};
 	createdAt: string;
@@ -50,8 +54,19 @@ export interface Case {
 	caseSDM: string;
 	status: string;
 	stage: number;
-	documents: any[];
-	remarks: any[];
+	documents: Array<{
+		url: string;
+		type: string;
+		uploadedAt: string;
+		_id: string;
+	}>;
+	remarks: Array<{
+		stage: number;
+		remark: string;
+		userId: string;
+		date: string;
+		_id: string;
+	}>;
 	createdAt: string;
 	updatedAt: string;
 	__v: number;
@@ -114,7 +129,7 @@ export interface FileUploadResponse {
 	canAccess: boolean;
 	canDownload: boolean;
 	compressionInfo: {
-		compressedPaths: Record<string, any>;
+		compressedPaths: Record<string, unknown>;
 		compressed: boolean;
 		originalSize: number;
 		compressionStatus: string;
@@ -130,14 +145,30 @@ export interface StatusOverview {
 
 export interface DelayAnalysis {
 	totalDelayed: number;
-	stageDelays: any[];
-	criticalDelays: any[];
+	stageDelays: Array<{
+		stage: number;
+		count: number;
+		delay: number;
+	}>;
+	criticalDelays: Array<{
+		caseId: string;
+		stage: number;
+		delay: number;
+	}>;
 }
 
 export interface RejectionAnalysis {
 	totalRejections: number;
-	rejectionsByStage: any[];
-	topRejectionReasons: any[];
+	rejectionsByStage: Array<{
+		stage: number;
+		rate: number;
+		count: number;
+	}>;
+	topRejectionReasons: Array<{
+		reason: string;
+		count: number;
+		percentage: number;
+	}>;
 }
 
 export interface Analytics {

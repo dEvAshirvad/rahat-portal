@@ -4,6 +4,14 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
+import {
 	Table,
 	TableBody,
 	TableCell,
@@ -11,16 +19,7 @@ import {
 	TableHeader,
 	TableRow,
 } from "@/components/ui/table";
-import {
-	Eye,
-	Check,
-	X,
-	Upload,
-	FileText,
-	Download,
-	Plus,
-	Edit,
-} from "lucide-react";
+import { Eye, Check, X, Upload, FileText, Download, Plus } from "lucide-react";
 import type { Case } from "@/types";
 
 interface CaseTableProps {
@@ -58,7 +57,6 @@ export default function CaseTable({
 			case "approve":
 				return (
 					[
-						"tehsildar",
 						"sdm",
 						"rahat-shakha",
 						"oic",
@@ -66,12 +64,12 @@ export default function CaseTable({
 						"collector",
 					].includes(userRole) &&
 					caseItem.stage >= 2 &&
-					caseItem.stage <= 8
+					caseItem.stage <= 7 &&
+					caseItem.status !== "closed"
 				);
 			case "reject":
 				return (
 					[
-						"tehsildar",
 						"sdm",
 						"rahat-shakha",
 						"oic",
@@ -79,14 +77,23 @@ export default function CaseTable({
 						"collector",
 					].includes(userRole) &&
 					caseItem.stage >= 2 &&
-					caseItem.stage <= 8
+					caseItem.stage <= 6 &&
+					caseItem.status !== "closed"
 				);
 			case "upload":
-				return userRole === "tehsildar" && caseItem.stage === 1;
+				return (
+					userRole === "tehsildar" &&
+					caseItem.stage === 1 &&
+					caseItem.status === "created"
+				);
 			case "create":
 				return userRole === "tehsildar";
 			case "close":
-				return userRole === "tehsildar" && caseItem.stage === 9;
+				return (
+					userRole === "tehsildar" &&
+					caseItem.stage === 8 &&
+					caseItem.status === "pendingTehsildar"
+				);
 			case "download":
 				return true;
 			default:
@@ -113,15 +120,14 @@ export default function CaseTable({
 
 	const getStageName = (stage: number) => {
 		const stages = [
-			"Case Created",
-			"Documents Uploaded",
-			"Tehsildar Review",
-			"SDM Review",
-			"Rahat Shakha Review",
-			"OIC Review",
-			"Additional Collector Review",
-			"Collector Review",
-			"Payment & Closure",
+			"Created Waiting for Documents",
+			"SDM Review Pending",
+			"Rahat Shakha Review Pending",
+			"OIC Review Pending",
+			"Additional Collector Review Pending",
+			"Collector Review Pending",
+			"Additional Collector Job Pending",
+			"Tehsildar distributes funds and closes case",
 		];
 		return stages[stage - 1] || `Stage ${stage}`;
 	};
@@ -184,7 +190,7 @@ export default function CaseTable({
 						{cases.map((caseItem) => (
 							<TableRow key={caseItem._id || caseItem.caseId}>
 								<TableCell className="font-medium">{caseItem.caseId}</TableCell>
-								<TableCell>{caseItem.victim.name}</TableCell>
+								<TableCell>{caseItem.victim?.name || "N/A"}</TableCell>
 								<TableCell>
 									<span
 										className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusColor(
@@ -223,8 +229,11 @@ export default function CaseTable({
 											<Button
 												variant="outline"
 												size="sm"
-												onClick={() => onUploadDocuments(caseItem.caseId)}>
-												<Upload className="h-4 w-4" />
+												onClick={() => onUploadDocuments(caseItem.caseId)}
+												title="Upload Documents"
+												className="text-blue-600 hover:text-blue-700">
+												<Upload className="h-4 w-4 mr-1" />
+												Upload
 											</Button>
 										)}
 
@@ -274,128 +283,125 @@ export default function CaseTable({
 				</Table>
 			</CardContent>
 
-			{/* Approve Modal */}
-			{showApproveModal && (
-				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-					<Card className="w-full max-w-md mx-4">
-						<CardHeader className="bg-gradient-to-r from-green-600 to-green-700 text-white">
-							<CardTitle>Approve Case</CardTitle>
-						</CardHeader>
-						<CardContent className="p-6">
-							<div className="space-y-4">
-								<div>
-									<label className="text-sm font-medium">Remark</label>
-									<textarea
-										className="w-full p-2 border rounded mt-1"
-										rows={3}
-										placeholder="Enter approval remark"
-										value={remark}
-										onChange={(e) => setRemark(e.target.value)}
-									/>
-								</div>
-								<div className="flex space-x-2">
-									<Button
-										onClick={handleApprove}
-										className="flex-1 bg-green-600 hover:bg-green-700">
-										Approve
-									</Button>
-									<Button
-										variant="outline"
-										onClick={() => {
-											setShowApproveModal(false);
-											setRemark("");
-											setSelectedCase(null);
-										}}>
-										Cancel
-									</Button>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				</div>
-			)}
+			{/* Approve Dialog */}
+			<Dialog open={showApproveModal} onOpenChange={setShowApproveModal}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>Approve Case</DialogTitle>
+						<DialogDescription>
+							Approve this case and add a remark.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="space-y-4">
+						<div>
+							<label className="text-sm font-medium">Remark</label>
+							<textarea
+								className="w-full p-2 border rounded mt-1"
+								rows={3}
+								placeholder="Enter approval remark"
+								value={remark}
+								onChange={(e) => setRemark(e.target.value)}
+							/>
+						</div>
+					</div>
+					<DialogFooter>
+						<Button
+							onClick={handleApprove}
+							className="bg-green-600 hover:bg-green-700">
+							Approve
+						</Button>
+						<Button
+							variant="outline"
+							onClick={() => {
+								setShowApproveModal(false);
+								setRemark("");
+								setSelectedCase(null);
+							}}>
+							Cancel
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
-			{/* Reject Modal */}
-			{showRejectModal && (
-				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-					<Card className="w-full max-w-md mx-4">
-						<CardHeader className="bg-gradient-to-r from-red-600 to-red-700 text-white">
-							<CardTitle>Reject Case</CardTitle>
-						</CardHeader>
-						<CardContent className="p-6">
-							<div className="space-y-4">
-								<div>
-									<label className="text-sm font-medium">Remark</label>
-									<textarea
-										className="w-full p-2 border rounded mt-1"
-										rows={3}
-										placeholder="Enter rejection remark"
-										value={remark}
-										onChange={(e) => setRemark(e.target.value)}
-									/>
-								</div>
-								<div className="flex space-x-2">
-									<Button
-										onClick={handleReject}
-										className="flex-1 bg-red-600 hover:bg-red-700">
-										Reject
-									</Button>
-									<Button
-										variant="outline"
-										onClick={() => {
-											setShowRejectModal(false);
-											setRemark("");
-											setSelectedCase(null);
-										}}>
-										Cancel
-									</Button>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				</div>
-			)}
+			{/* Reject Dialog */}
+			<Dialog open={showRejectModal} onOpenChange={setShowRejectModal}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>Reject Case</DialogTitle>
+						<DialogDescription>
+							Reject this case and add a remark.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="space-y-4">
+						<div>
+							<label className="text-sm font-medium">Remark</label>
+							<textarea
+								className="w-full p-2 border rounded mt-1"
+								rows={3}
+								placeholder="Enter rejection remark"
+								value={remark}
+								onChange={(e) => setRemark(e.target.value)}
+							/>
+						</div>
+					</div>
+					<DialogFooter>
+						<Button
+							onClick={handleReject}
+							className="bg-red-600 hover:bg-red-700">
+							Reject
+						</Button>
+						<Button
+							variant="outline"
+							onClick={() => {
+								setShowRejectModal(false);
+								setRemark("");
+								setSelectedCase(null);
+							}}>
+							Cancel
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 
-			{/* Close Case Modal */}
-			{showCloseModal && (
-				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-					<Card className="w-full max-w-md mx-4">
-						<CardHeader className="bg-gradient-to-r from-blue-600 to-blue-700 text-white">
-							<CardTitle>Close Case</CardTitle>
-						</CardHeader>
-						<CardContent className="p-6">
-							<div className="space-y-4">
-								<div>
-									<label className="text-sm font-medium">Payment Remark</label>
-									<textarea
-										className="w-full p-2 border rounded mt-1"
-										rows={3}
-										placeholder="Enter payment remark"
-										value={paymentRemark}
-										onChange={(e) => setPaymentRemark(e.target.value)}
-									/>
-								</div>
-								<div className="flex space-x-2">
-									<Button
-										onClick={handleClose}
-										className="flex-1 bg-blue-600 hover:bg-blue-700">
-										Close Case
-									</Button>
-									<Button
-										variant="outline"
-										onClick={() => {
-											setShowCloseModal(false);
-											setPaymentRemark("");
-											setSelectedCase(null);
-										}}>
-										Cancel
-									</Button>
-								</div>
-							</div>
-						</CardContent>
-					</Card>
-				</div>
-			)}
+			{/* Close Case Dialog */}
+			<Dialog open={showCloseModal} onOpenChange={setShowCloseModal}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>Close Case</DialogTitle>
+						<DialogDescription>
+							Close this case and add payment details.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="space-y-4">
+						<div>
+							<label className="text-sm font-medium">Payment Remark</label>
+							<textarea
+								className="w-full p-2 border rounded mt-1"
+								rows={3}
+								placeholder="Enter payment remark"
+								value={paymentRemark}
+								onChange={(e) => setPaymentRemark(e.target.value)}
+							/>
+						</div>
+					</div>
+					<DialogFooter>
+						<Button
+							onClick={handleClose}
+							className="bg-blue-600 hover:bg-blue-700">
+							Close Case
+						</Button>
+						<Button
+							variant="outline"
+							onClick={() => {
+								setShowCloseModal(false);
+								setPaymentRemark("");
+								setSelectedCase(null);
+							}}>
+							Cancel
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</Card>
 	);
 }

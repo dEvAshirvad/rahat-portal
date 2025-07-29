@@ -17,7 +17,11 @@ import {
 } from "recharts";
 
 interface AnalyticsChartProps {
-	data: any[];
+	data: Array<{
+		name: string;
+		value: number;
+		color?: string;
+	}>;
 	type: "bar" | "pie" | "line";
 	title: string;
 	dataKey: string;

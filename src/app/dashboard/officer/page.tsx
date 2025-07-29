@@ -2,8 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogFooter,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog";
 import {
 	useMyPendingCases,
 	useUpdateCase,
@@ -20,12 +28,11 @@ import CaseTable from "@/components/CaseTable";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import Footer from "@/components/layout/Footer";
-import { LogOut, X } from "lucide-react";
+import { LogOut } from "lucide-react";
 
 export default function OfficerDashboard() {
 	const router = useRouter();
-	const [userRole, setUserRole] = useState<string>("");
-	const [selectedStage, setSelectedStage] = useState<number | undefined>();
+
 	const [showCreateModal, setShowCreateModal] = useState(false);
 	const [showUploadModal, setShowUploadModal] = useState(false);
 	const [selectedCaseId, setSelectedCaseId] = useState<string>("");
@@ -59,12 +66,6 @@ export default function OfficerDashboard() {
 	const uploadFileMutation = useUploadFile();
 	const logoutMutation = useLogout();
 
-	useEffect(() => {
-		if (member) {
-			setUserRole(member.role);
-		}
-	}, [member]);
-
 	// Set default SDM when members are loaded
 	useEffect(() => {
 		if (
@@ -91,20 +92,6 @@ export default function OfficerDashboard() {
 			admin: "Collector Dashboard",
 		};
 		return titles[role as keyof typeof titles] || "Officer Dashboard";
-	};
-
-	const getStageFilter = (role: string) => {
-		const stageMap = {
-			tehsildar: [1, 2, 3, 9],
-			sdm: [4],
-			"rahat-shakha": [5],
-			oic: [6],
-			"additional-collector": [7],
-			collector: [8],
-		};
-		return (
-			stageMap[role as keyof typeof stageMap] || [1, 2, 3, 4, 5, 6, 7, 8, 9]
-		);
 	};
 
 	const handleViewCase = (caseId: string) => {
@@ -294,7 +281,6 @@ export default function OfficerDashboard() {
 	}
 
 	const roleTitle = getRoleTitle(member.role);
-	const stageFilters = getStageFilter(member.role);
 	const cases = pendingCasesData?.docs || [];
 
 	return (
@@ -378,240 +364,212 @@ export default function OfficerDashboard() {
 
 			<Footer />
 
-			{/* Create Case Modal */}
-			{showCreateModal && (
-				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-					<Card className="w-full max-w-2xl mx-4">
-						<CardHeader className="bg-gradient-to-r from-slate-700 to-slate-800 text-white flex justify-between items-center">
-							<CardTitle className="text-xl">Create New Case</CardTitle>
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={() => setShowCreateModal(false)}
-								className="text-white hover:bg-white/20">
-								<X className="h-5 w-5" />
-							</Button>
-						</CardHeader>
-						<CardContent className="p-6">
-							<form onSubmit={handleCreateCaseSubmit} className="space-y-4">
-								<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-									<div>
-										<label className="text-sm font-medium">Victim Name *</label>
-										<input
-											type="text"
-											className="w-full p-2 border rounded mt-1"
-											placeholder="Enter victim name"
-											value={createCaseForm.name}
-											onChange={(e) =>
-												setCreateCaseForm({
-													...createCaseForm,
-													name: e.target.value,
-												})
-											}
-											required
-										/>
-									</div>
-									<div>
-										<label className="text-sm font-medium">
-											Date of Birth *
-										</label>
-										<input
-											type="date"
-											className="w-full p-2 border rounded mt-1"
-											value={createCaseForm.dob}
-											onChange={(e) =>
-												setCreateCaseForm({
-													...createCaseForm,
-													dob: e.target.value,
-												})
-											}
-											required
-										/>
-									</div>
-									<div>
-										<label className="text-sm font-medium">
-											Date of Death *
-										</label>
-										<input
-											type="date"
-											className="w-full p-2 border rounded mt-1"
-											value={createCaseForm.dod}
-											onChange={(e) =>
-												setCreateCaseForm({
-													...createCaseForm,
-													dod: e.target.value,
-												})
-											}
-											required
-										/>
-									</div>
-									<div>
-										<label className="text-sm font-medium">
-											Contact Number *
-										</label>
-										<input
-											type="tel"
-											className="w-full p-2 border rounded mt-1"
-											placeholder="Enter contact number"
-											value={createCaseForm.contact}
-											onChange={(e) =>
-												setCreateCaseForm({
-													...createCaseForm,
-													contact: e.target.value,
-												})
-											}
-											required
-										/>
-									</div>
-								</div>
-								<div>
-									<label className="text-sm font-medium">Address *</label>
-									<textarea
-										className="w-full p-2 border rounded mt-1"
-										rows={3}
-										placeholder="Enter address"
-										value={createCaseForm.address}
-										onChange={(e) =>
-											setCreateCaseForm({
-												...createCaseForm,
-												address: e.target.value,
-											})
-										}
-										required
-									/>
-								</div>
-								<div>
-									<label className="text-sm font-medium">Description *</label>
-									<textarea
-										className="w-full p-2 border rounded mt-1"
-										rows={3}
-										placeholder="Enter case description"
-										value={createCaseForm.description}
-										onChange={(e) =>
-											setCreateCaseForm({
-												...createCaseForm,
-												description: e.target.value,
-											})
-										}
-										required
-									/>
-								</div>
-								<div>
-									<label className="text-sm font-medium">Assign SDM *</label>
-									<select
-										className="w-full p-2 border rounded mt-1"
-										value={createCaseForm.caseSDM}
-										onChange={(e) =>
-											setCreateCaseForm({
-												...createCaseForm,
-												caseSDM: e.target.value,
-											})
-										}
-										required>
-										<option value="">Select SDM</option>
-										{sdmMembers?.docs?.map((sdm) => (
-											<option key={sdm._id} value={sdm.userId}>
-												{sdm.user.name} - {sdm.user.email}
-											</option>
-										))}
-									</select>
-								</div>
-								<div className="flex space-x-2">
-									<Button
-										type="submit"
-										disabled={createCaseMutation.isPending}
-										className="flex-1 bg-green-600 hover:bg-green-700">
-										{createCaseMutation.isPending
-											? "Creating..."
-											: "Create Case"}
-									</Button>
-									<Button
-										type="button"
-										variant="outline"
-										onClick={() => setShowCreateModal(false)}>
-										Cancel
-									</Button>
-								</div>
-							</form>
-						</CardContent>
-					</Card>
-				</div>
-			)}
-
-			{/* Upload Documents Modal */}
-			{showUploadModal && (
-				<div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-					<Card className="w-full max-w-md mx-4">
-						<CardHeader className="bg-gradient-to-r from-slate-700 to-slate-800 text-white flex justify-between items-center">
-							<CardTitle className="text-xl">Upload Documents</CardTitle>
-							<Button
-								variant="ghost"
-								size="icon"
-								onClick={() => setShowUploadModal(false)}
-								className="text-white hover:bg-white/20">
-								<X className="h-5 w-5" />
-							</Button>
-						</CardHeader>
-						<CardContent className="p-6">
-							<div className="space-y-4">
-								<div>
-									<label className="text-sm font-medium">
-										Patwari Documents
-									</label>
-									<input
-										type="file"
-										multiple
-										className="w-full p-2 border rounded mt-1"
-										accept=".pdf,.jpg,.jpeg,.png"
-										onChange={(e) =>
-											setPatwariFiles(Array.from(e.target.files || []))
-										}
-									/>
-									{patwariFiles.length > 0 && (
-										<p className="text-sm text-gray-600 mt-1">
-											{patwariFiles.length} file(s) selected
-										</p>
-									)}
-								</div>
-								<div>
-									<label className="text-sm font-medium">TI Documents</label>
-									<input
-										type="file"
-										multiple
-										className="w-full p-2 border rounded mt-1"
-										accept=".pdf,.jpg,.jpeg,.png"
-										onChange={(e) =>
-											setTiFiles(Array.from(e.target.files || []))
-										}
-									/>
-									{tiFiles.length > 0 && (
-										<p className="text-sm text-gray-600 mt-1">
-											{tiFiles.length} file(s) selected
-										</p>
-									)}
-								</div>
-								<div className="flex space-x-2">
-									<Button
-										onClick={handleFileUpload}
-										disabled={uploadingFiles}
-										className="flex-1 bg-green-600 hover:bg-green-700">
-										{uploadingFiles ? "Uploading..." : "Upload"}
-									</Button>
-									<Button
-										variant="outline"
-										onClick={() => {
-											setShowUploadModal(false);
-											setPatwariFiles([]);
-											setTiFiles([]);
-										}}>
-										Cancel
-									</Button>
-								</div>
+			{/* Create Case Dialog */}
+			<Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+				<DialogContent className="sm:max-w-2xl">
+					<DialogHeader>
+						<DialogTitle>Create New Case</DialogTitle>
+						<DialogDescription>
+							Fill in the details to create a new case.
+						</DialogDescription>
+					</DialogHeader>
+					<form onSubmit={handleCreateCaseSubmit} className="space-y-4">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div>
+								<label className="text-sm font-medium">Victim Name *</label>
+								<input
+									type="text"
+									className="w-full p-2 border rounded mt-1"
+									placeholder="Enter victim name"
+									value={createCaseForm.name}
+									onChange={(e) =>
+										setCreateCaseForm({
+											...createCaseForm,
+											name: e.target.value,
+										})
+									}
+									required
+								/>
 							</div>
-						</CardContent>
-					</Card>
-				</div>
-			)}
+							<div>
+								<label className="text-sm font-medium">Date of Birth *</label>
+								<input
+									type="date"
+									className="w-full p-2 border rounded mt-1"
+									value={createCaseForm.dob}
+									onChange={(e) =>
+										setCreateCaseForm({
+											...createCaseForm,
+											dob: e.target.value,
+										})
+									}
+									required
+								/>
+							</div>
+							<div>
+								<label className="text-sm font-medium">Date of Death *</label>
+								<input
+									type="date"
+									className="w-full p-2 border rounded mt-1"
+									value={createCaseForm.dod}
+									onChange={(e) =>
+										setCreateCaseForm({
+											...createCaseForm,
+											dod: e.target.value,
+										})
+									}
+									required
+								/>
+							</div>
+							<div>
+								<label className="text-sm font-medium">Contact Number *</label>
+								<input
+									type="tel"
+									className="w-full p-2 border rounded mt-1"
+									placeholder="Enter contact number"
+									value={createCaseForm.contact}
+									onChange={(e) =>
+										setCreateCaseForm({
+											...createCaseForm,
+											contact: e.target.value,
+										})
+									}
+									required
+								/>
+							</div>
+						</div>
+						<div>
+							<label className="text-sm font-medium">Address *</label>
+							<textarea
+								className="w-full p-2 border rounded mt-1"
+								rows={3}
+								placeholder="Enter address"
+								value={createCaseForm.address}
+								onChange={(e) =>
+									setCreateCaseForm({
+										...createCaseForm,
+										address: e.target.value,
+									})
+								}
+								required
+							/>
+						</div>
+						<div>
+							<label className="text-sm font-medium">Description *</label>
+							<textarea
+								className="w-full p-2 border rounded mt-1"
+								rows={3}
+								placeholder="Enter case description"
+								value={createCaseForm.description}
+								onChange={(e) =>
+									setCreateCaseForm({
+										...createCaseForm,
+										description: e.target.value,
+									})
+								}
+								required
+							/>
+						</div>
+						<div>
+							<label className="text-sm font-medium">Assign SDM *</label>
+							<select
+								className="w-full p-2 border rounded mt-1"
+								value={createCaseForm.caseSDM}
+								onChange={(e) =>
+									setCreateCaseForm({
+										...createCaseForm,
+										caseSDM: e.target.value,
+									})
+								}
+								required>
+								<option value="">Select SDM</option>
+								{sdmMembers?.docs?.map((sdm) => (
+									<option key={sdm._id} value={sdm.userId}>
+										{sdm.user.name} - {sdm.user.email}
+									</option>
+								))}
+							</select>
+						</div>
+						<DialogFooter>
+							<Button
+								type="submit"
+								disabled={createCaseMutation.isPending}
+								className="bg-green-600 hover:bg-green-700">
+								{createCaseMutation.isPending ? "Creating..." : "Create Case"}
+							</Button>
+							<Button
+								type="button"
+								variant="outline"
+								onClick={() => setShowCreateModal(false)}>
+								Cancel
+							</Button>
+						</DialogFooter>
+					</form>
+				</DialogContent>
+			</Dialog>
+
+			{/* Upload Documents Dialog */}
+			<Dialog open={showUploadModal} onOpenChange={setShowUploadModal}>
+				<DialogContent className="sm:max-w-md">
+					<DialogHeader>
+						<DialogTitle>Upload Documents</DialogTitle>
+						<DialogDescription>
+							Upload Patwari and TI documents for this case.
+						</DialogDescription>
+					</DialogHeader>
+					<div className="space-y-4">
+						<div>
+							<label className="text-sm font-medium">Patwari Documents</label>
+							<input
+								type="file"
+								multiple
+								className="w-full p-2 border rounded mt-1"
+								accept=".pdf,.jpg,.jpeg,.png"
+								onChange={(e) =>
+									setPatwariFiles(Array.from(e.target.files || []))
+								}
+							/>
+							{patwariFiles.length > 0 && (
+								<p className="text-sm text-gray-600 mt-1">
+									{patwariFiles.length} file(s) selected
+								</p>
+							)}
+						</div>
+						<div>
+							<label className="text-sm font-medium">TI Documents</label>
+							<input
+								type="file"
+								multiple
+								className="w-full p-2 border rounded mt-1"
+								accept=".pdf,.jpg,.jpeg,.png"
+								onChange={(e) => setTiFiles(Array.from(e.target.files || []))}
+							/>
+							{tiFiles.length > 0 && (
+								<p className="text-sm text-gray-600 mt-1">
+									{tiFiles.length} file(s) selected
+								</p>
+							)}
+						</div>
+					</div>
+					<DialogFooter>
+						<Button
+							onClick={handleFileUpload}
+							disabled={uploadingFiles}
+							className="bg-green-600 hover:bg-green-700">
+							{uploadingFiles ? "Uploading..." : "Upload"}
+						</Button>
+						<Button
+							variant="outline"
+							onClick={() => {
+								setShowUploadModal(false);
+								setPatwariFiles([]);
+								setTiFiles([]);
+							}}>
+							Cancel
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }
