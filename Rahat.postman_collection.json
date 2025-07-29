@@ -1,0 +1,348 @@
+{
+	"info": {
+		"_postman_id": "df2b2bac-5661-4161-a497-1ed9f679a6e1",
+		"name": "Rahat",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26569267"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "New Request",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Cookie",
+								"value": "kpi-central.session_token=iRDPWgLTIiChex5I28z14XaeuZ240VyY.k3N6CZIJTFEw%2BCdYAXAs4Z%2BX8yXlmo3K%2Fi%2FOLsCwUjw%3D"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"email\": \"collector@raipur.com\",\n  \"password\": \"admin1234\",\n  \"rememberMe\": true\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{AUTH_URL}}/api/auth/sign-in/email",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"api",
+								"auth",
+								"sign-in",
+								"email"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "New Request Copy",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{AUTH_URL}}/api/v1/members/me",
+							"host": [
+								"{{AUTH_URL}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"members",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Cases",
+			"item": [
+				{
+					"name": "Create Case",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Vikas Sinha\",\n    \"dob\": \"2001/02/02\",\n    \"dod\": \"2025/02/02\",\n    \"address\": \"Raipur\",\n    \"contact\": \"+918249916506\",\n    \"description\": \"Drowning\",\n    \"caseSDM\" : \"68857406b8952ea08cecc71e\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/cases/create",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"cases",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Serach Case",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Vikas\",\n    \"dob\": \"2001/02/02\",\n    \"dod\": \"2025/02/02\",\n    \"address\": \"Raipur\",\n    \"contact\": \"+918249916506\",\n    \"description\": \"Drowning\"\n}"
+						},
+						"url": {
+							"raw": "{{URL}}/cases",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"cases"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Serach Case Copy",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Vikas\",\n    \"dob\": \"2001/02/02\",\n    \"dod\": \"2025/02/02\",\n    \"address\": \"Raipur\",\n    \"contact\": \"+918249916506\",\n    \"description\": \"Drowning\"\n}"
+						},
+						"url": {
+							"raw": "{{URL}}/cases/:id/final-pdf",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"cases",
+								":id",
+								"final-pdf"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "RAHAT-2025-2907-6947"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get PDF",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{URL}}/cases/:id/pdf",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"cases",
+								":id",
+								"pdf"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "RAHAT-2025-2907-6947"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stage 2 Upload Docs",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"patwari\": [\"http://localhost:3034/api/v1/files/6887e18f597a664d5a4cb6d8/serve\", \"http://localhost:3034/api/v1/files/6887e2600937bb6803affb87/serve\"],\n    \"ti\" : [\"http://localhost:3034/api/v1/files/6887e2600937bb6803affb87/serve\"]\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/cases/:id/documents/upload",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"cases",
+								":id",
+								"documents",
+								"upload"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "RAHAT-2025-2907-6947"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Pending Cases",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Vikas\",\n    \"dob\": \"2001/02/02\",\n    \"dod\": \"2025/02/02\",\n    \"address\": \"Raipur\",\n    \"contact\": \"+918249916506\",\n    \"description\": \"Drowning\"\n}"
+						},
+						"url": {
+							"raw": "{{URL}}/cases/my-pending",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"cases",
+								"my-pending"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stage 3-9",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"status\": \"approved\",\n  \"remark\": \"All documents verified and approved\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/cases/:id/update",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"cases",
+								":id",
+								"update"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "RAHAT-2025-2907-6947"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stage 3-9 Copy",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentRemark\" : \"Cash\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/cases/:id/close",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"cases",
+								":id",
+								"close"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "RAHAT-2025-2907-6947"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Stage 3-9 Copy 2",
+					"request": {
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"paymentRemark\" : \"CASH\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{URL}}/cases/:id/fix-payment",
+							"host": [
+								"{{URL}}"
+							],
+							"path": [
+								"cases",
+								":id",
+								"fix-payment"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "RAHAT-2025-2907-6947"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}
