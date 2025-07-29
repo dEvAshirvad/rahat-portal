@@ -43,6 +43,7 @@ interface CaseSingleDetailsProps {
 export default function CaseSingleDetails({ params }: CaseSingleDetailsProps) {
 	const { caseId } = use(params);
 	const router = useRouter();
+	const [postmortemFiles, setPostmortemFiles] = useState<File[]>([]);
 	const [showUploadModal, setShowUploadModal] = useState(false);
 	const [showApproveModal, setShowApproveModal] = useState(false);
 	const [showRejectModal, setShowRejectModal] = useState(false);
@@ -103,6 +104,7 @@ export default function CaseSingleDetails({ params }: CaseSingleDetailsProps) {
 		try {
 			const patwariUrls: string[] = [];
 			const tiUrls: string[] = [];
+			const postmortemUrls: string[] = [];
 
 			// Upload Patwari files
 			for (const file of patwariFiles) {
@@ -128,12 +130,24 @@ export default function CaseSingleDetails({ params }: CaseSingleDetailsProps) {
 				tiUrls.push(uploadResult.fileUrl);
 			}
 
+			// Upload Postmortem files
+			for (const file of tiFiles) {
+				const uploadResult = await uploadFileMutation.mutateAsync({
+					file,
+					entityType: "other",
+					uploadedFor: caseId,
+					description: `Postmortem document for case ${caseId}`,
+					tags: ["postmortem", "case-document"],
+				});
+				postmortemUrls.push(uploadResult.fileUrl);
+			}
 			// Upload documents to case
 			await uploadDocumentsMutation.mutateAsync({
 				id: caseId,
 				data: {
 					patwari: patwariUrls,
 					ti: tiUrls,
+					postmortem: postmortemUrls,
 				},
 			});
 
@@ -141,6 +155,7 @@ export default function CaseSingleDetails({ params }: CaseSingleDetailsProps) {
 			setShowUploadModal(false);
 			setPatwariFiles([]);
 			setTiFiles([]);
+			setPostmortemFiles([]);
 		} catch (error) {
 			console.error("Failed to upload documents:", error);
 			alert("Failed to upload documents");
@@ -628,16 +643,21 @@ export default function CaseSingleDetails({ params }: CaseSingleDetailsProps) {
 									</p>
 								)}
 							</div>
+
 							<div>
-								<label className="text-sm font-medium">TI Documents</label>
+								<label className="text-sm font-medium">
+									Postmortem Documents
+								</label>
 								<input
 									type="file"
 									multiple
 									className="w-full p-2 border rounded mt-1"
 									accept=".pdf,.jpg,.jpeg,.png"
-									onChange={(e) => setTiFiles(Array.from(e.target.files || []))}
+									onChange={(e) =>
+										setPostmortemFiles(Array.from(e.target.files || []))
+									}
 								/>
-								{tiFiles.length > 0 && (
+								{postmortemFiles.length > 0 && (
 									<p className="text-sm text-gray-600 mt-1">
 										{tiFiles.length} file(s) selected
 									</p>
@@ -657,6 +677,7 @@ export default function CaseSingleDetails({ params }: CaseSingleDetailsProps) {
 									setShowUploadModal(false);
 									setPatwariFiles([]);
 									setTiFiles([]);
+									setPostmortemFiles([]);
 								}}>
 								Cancel
 							</Button>
