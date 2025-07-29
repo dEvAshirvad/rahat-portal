@@ -241,7 +241,9 @@ export default function OfficerDashboard() {
 		try {
 			// Call the actual API to get the PDF blob
 			const response = await fetch(
-				`http://localhost:3033/api/v1/cases/${caseId}/pdf`,
+				`${
+					process.env.NEXT_PUBLIC_CASES_API_URL || "http://localhost:3033"
+				}/api/v1/cases/${caseId}/pdf`,
 				{
 					credentials: "include", // Include cookies for authentication
 				}

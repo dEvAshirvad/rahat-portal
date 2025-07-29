@@ -13,7 +13,7 @@ import type {
 
 // Create axios instance for auth service
 const authApi = axios.create({
-	baseURL: "http://localhost:3001",
+	baseURL: process.env.NEXT_PUBLIC_AUTH_API_URL || "http://localhost:3001",
 	headers: {
 		"Content-Type": "application/json",
 	},
@@ -22,7 +22,7 @@ const authApi = axios.create({
 
 // Create axios instance for case service
 const caseApi = axios.create({
-	baseURL: "http://localhost:3033",
+	baseURL: process.env.NEXT_PUBLIC_CASES_API_URL || "http://localhost:3033",
 	headers: {
 		"Content-Type": "application/json",
 	},
@@ -31,7 +31,7 @@ const caseApi = axios.create({
 
 // Create axios instance for file service
 const fileApi = axios.create({
-	baseURL: "http://localhost:3034",
+	baseURL: process.env.NEXT_PUBLIC_FILES_API_URL || "http://localhost:3034",
 	withCredentials: true, // Enable cookies for session management
 });
 
