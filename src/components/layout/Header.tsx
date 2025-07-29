@@ -17,7 +17,7 @@ export default function Header() {
 									प्रोजेक्ट राहत
 								</h1>
 								<p className="text-sm text-red-700 font-medium drop-shadow-sm">
-									PROJECT RAHAT | GOVERNMENT OF CHHATTISGARH
+									PROJECT RAHAT | District Administration Raipur
 								</p>
 							</div>
 						</div>

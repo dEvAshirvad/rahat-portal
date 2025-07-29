@@ -397,6 +397,7 @@ export const casesApi = {
 		documents: {
 			patwari: number;
 			ti: number;
+			postmortem: number;
 			total: number;
 		};
 		newStatus: string;
@@ -409,6 +410,7 @@ export const casesApi = {
 				documents: {
 					patwari: number;
 					ti: number;
+					postmortem: number;
 					total: number;
 				};
 				newStatus: string;
@@ -421,6 +423,7 @@ export const casesApi = {
 			documents: {
 				patwari: number;
 				ti: number;
+				postmortem: number;
 				total: number;
 			};
 			newStatus: string;

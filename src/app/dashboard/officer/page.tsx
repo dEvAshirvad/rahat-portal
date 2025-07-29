@@ -38,6 +38,7 @@ export default function OfficerDashboard() {
 	const [selectedCaseId, setSelectedCaseId] = useState<string>("");
 	const [patwariFiles, setPatwariFiles] = useState<File[]>([]);
 	const [tiFiles, setTiFiles] = useState<File[]>([]);
+	const [postmortemFiles, setPostmortemFiles] = useState<File[]>([]);
 	const [uploadingFiles, setUploadingFiles] = useState(false);
 
 	// Create case form state
@@ -138,6 +139,7 @@ export default function OfficerDashboard() {
 		try {
 			const patwariUrls: string[] = [];
 			const tiUrls: string[] = [];
+			const postmortemUrls: string[] = [];
 
 			// Upload Patwari files
 			for (const file of patwariFiles) {
@@ -163,12 +165,24 @@ export default function OfficerDashboard() {
 				tiUrls.push(uploadResult.fileUrl);
 			}
 
+			for (const file of postmortemFiles) {
+				const uploadResult = await uploadFileMutation.mutateAsync({
+					file,
+					entityType: "other",
+					uploadedFor: selectedCaseId,
+					description: `Postmortem document for case ${selectedCaseId}`,
+					tags: ["postmortem", "case-document"],
+				});
+				postmortemUrls.push(uploadResult.fileUrl);
+			}
+
 			// Upload documents to case
 			await uploadDocumentsMutation.mutateAsync({
 				id: selectedCaseId,
 				data: {
 					patwari: patwariUrls,
 					ti: tiUrls,
+					postmortem: postmortemUrls,
 				},
 			});
 
@@ -550,6 +564,25 @@ export default function OfficerDashboard() {
 								</p>
 							)}
 						</div>
+						<div>
+							<label className="text-sm font-medium">
+								Postmortem Documents
+							</label>
+							<input
+								type="file"
+								multiple
+								className="w-full p-2 border rounded mt-1"
+								accept=".pdf,.jpg,.jpeg,.png"
+								onChange={(e) =>
+									setPostmortemFiles(Array.from(e.target.files || []))
+								}
+							/>
+							{postmortemFiles.length > 0 && (
+								<p className="text-sm text-gray-600 mt-1">
+									{postmortemFiles.length} file(s) selected
+								</p>
+							)}
+						</div>
 					</div>
 					<DialogFooter>
 						<Button
@@ -564,6 +597,7 @@ export default function OfficerDashboard() {
 								setShowUploadModal(false);
 								setPatwariFiles([]);
 								setTiFiles([]);
+								setPostmortemFiles([]);
 							}}>
 							Cancel
 						</Button>

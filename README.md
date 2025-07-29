@@ -257,7 +257,7 @@ For technical support:
 
 ## License
 
-© 2025 Government of Chhattisgarh. All rights reserved.
+© 2025 District Administration Raipur. All rights reserved.
 
 ---
 

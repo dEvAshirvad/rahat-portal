@@ -4,7 +4,7 @@ export default function Footer() {
 			<div className="container mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8 text-sm text-slate-300">
 				<div>
 					<h3 className="font-bold mb-4 text-white">
-						Government of Chhattisgarh
+						District Administration Raipur
 					</h3>
 					<p>Official portal for RBC 6(4) case resolution</p>
 					<p className="mt-2">
@@ -55,7 +55,7 @@ export default function Footer() {
 				</div>
 			</div>
 			<div className="border-t border-slate-700 mt-8 pt-4 text-center text-sm text-slate-400">
-				&copy; 2025 Government of Chhattisgarh. All rights reserved.
+				&copy; 2025 District Administration Raipur. All rights reserved.
 			</div>
 		</footer>
 	);

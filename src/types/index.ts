@@ -108,6 +108,7 @@ export interface CaseUpdateRequest {
 export interface DocumentUploadRequest {
 	patwari: string[]; // Array of fileUrl strings
 	ti: string[]; // Array of fileUrl strings
+	postmortem: string[]; // Array of fileUrl strings
 }
 
 export interface FileUploadResponse {
