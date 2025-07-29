@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import React from "react";
 import { authService, casesApi, analyticsApi, fileService } from "@/lib/api";
 import type { CaseUpdateRequest, DocumentUploadRequest } from "@/types";
 
@@ -9,6 +10,8 @@ export const useLogin = () => {
 	return useMutation({
 		mutationFn: authService.login,
 		onSuccess: (data) => {
+			// Clear all queries when logging in to ensure fresh data
+			queryClient.clear();
 			// Store user data in query cache
 			queryClient.setQueryData(["user"], data.user);
 		},
@@ -16,20 +19,48 @@ export const useLogin = () => {
 };
 
 export const useCurrentUser = () => {
-	return useQuery({
+	const queryClient = useQueryClient();
+
+	const query = useQuery({
 		queryKey: ["user"],
 		queryFn: authService.getCurrentUser,
 		// Always try to get user session
 		enabled: true,
 	});
+
+	// Invalidate case queries when user changes
+	React.useEffect(() => {
+		if (query.data) {
+			queryClient.invalidateQueries({ queryKey: ["my-pending-cases"] });
+			queryClient.invalidateQueries({ queryKey: ["cases"] });
+			queryClient.invalidateQueries({ queryKey: ["analytics"] });
+		}
+	}, [query.data?.id, queryClient]);
+
+	return query;
 };
 
 export const useMemberInfo = () => {
-	return useQuery({
+	const queryClient = useQueryClient();
+
+	const query = useQuery({
 		queryKey: ["member"],
 		queryFn: authService.getMemberInfo,
 		enabled: true,
 	});
+
+	// Invalidate case queries when member info changes (role change)
+	React.useEffect(() => {
+		if (query.data) {
+			// Clear all case-related queries when role changes
+			queryClient.invalidateQueries({ queryKey: ["my-pending-cases"] });
+			queryClient.invalidateQueries({ queryKey: ["cases"] });
+			queryClient.invalidateQueries({ queryKey: ["analytics"] });
+			queryClient.invalidateQueries({ queryKey: ["case"] });
+		}
+	}, [query.data?.role, queryClient]);
+
+	return query;
 };
 
 export const useMembersByRole = (role: string) => {
@@ -46,11 +77,8 @@ export const useLogout = () => {
 	return useMutation({
 		mutationFn: authService.logout,
 		onSuccess: () => {
-			// Clear user data from cache
-			queryClient.removeQueries({ queryKey: ["user"] });
-			queryClient.removeQueries({ queryKey: ["member"] });
-			queryClient.removeQueries({ queryKey: ["cases"] });
-			queryClient.removeQueries({ queryKey: ["analytics"] });
+			// Clear ALL queries from cache when logging out
+			queryClient.clear();
 		},
 	});
 };
@@ -72,9 +100,12 @@ export const useMyPendingCases = (params?: {
 	limit?: number;
 	search?: string;
 }) => {
+	const { data: member } = useMemberInfo();
+
 	return useQuery({
-		queryKey: ["my-pending-cases", params],
+		queryKey: ["my-pending-cases", member?.role, params],
 		queryFn: () => casesApi.getMyPendingCases(params),
+		enabled: !!member?.role,
 	});
 };
 
