@@ -37,16 +37,16 @@ const fileApi = axios.create({
 });
 
 // Response interceptor for error handling
-caseApi.interceptors.response.use(
-	(response) => response,
-	(error) => {
-		if (error.response?.status === 401) {
-			// Redirect to login on unauthorized
-			window.location.href = "/login";
-		}
-		return Promise.reject(error);
-	}
-);
+// caseApi.interceptors.response.use(
+// 	(response) => response,
+// 	(error) => {
+// 		if (error.response?.status === 401) {
+// 			// Redirect to login on unauthorized
+// 			window.location.href = "/login";
+// 		}
+// 		return Promise.reject(error);
+// 	}
+// );
 
 // Auth API
 export const authService = {
